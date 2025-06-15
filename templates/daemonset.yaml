@@ -1,0 +1,69 @@
+{{- if .Values.agent.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "beszel.fullname" . }}-agent
+  labels:
+    {{- include "beszel.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "beszel.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "beszel.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      hostNetwork: true
+      containers:
+        - name: {{ .Chart.Name }}-agent
+          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: LISTEN
+              value: "{{ .Values.agent.listenPort }}"
+            - name: KEY
+              value: "{{ .Values.agent.key }}"
+          ports:
+            - containerPort: {{ .Values.agent.listenPort | int }}
+              hostPort: {{ .Values.agent.listenPort | int }}
+          livenessProbe:
+            exec:
+              command:
+                - /agent
+                - health
+            initialDelaySeconds: 5
+            periodSeconds: 120
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /agent
+                - health
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 2              
+      restartPolicy: Always
+      {{- with .Values.agent.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}          
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 100%
+    type: RollingUpdate
+{{- end }}

@@ -1,0 +1,18 @@
+apiVersion: v2
+name: beszel
+description: A Helm chart for deploying Beszel — a lightweight, self-hosted server and container monitoring hub with historical data, alerts and Docker/Podman stats.
+type: application
+version: 1.0.0
+appVersion: "0.11.1"
+home: https://github.com/henrygd/beszel
+sources:
+  - https://github.com/henrygd/beszel
+keywords:
+  - monitoring
+  - metrics
+  - docker
+  - alerts
+  - self-hosted
+maintainers:
+  - name: Natpnk
+    url: https://github.com/natpnk/beszel-helm

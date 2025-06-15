@@ -1,0 +1,65 @@
+replicaCount: 1
+
+image:
+  repository: henrygd/beszel
+  tag: latest
+  pullPolicy: IfNotPresent
+
+agent:
+  enabled: true
+  image:
+    repository: henrygd/beszel-agent
+    tag: latest
+    pullPolicy: IfNotPresent
+  listenPort: 45876
+  key: ''
+  tolerations:
+    - key: "node-role.kubernetes.io/master"
+      operator: "Exists"
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8090
+
+persistence:
+  enabled: false
+  size: 1Gi
+  accessMode: ReadWriteOnce
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+resources: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: beszel.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+  - secretName: beszel-tls
+    hosts:
+    - beszel.local
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
