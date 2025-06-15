@@ -34,7 +34,14 @@ spec:
             - name: LISTEN
               value: "{{ .Values.agent.listenPort }}"
             - name: KEY
-              value: "{{ .Values.agent.key }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.agent.existingSecret }}
+                    {{ .Values.agent.existingSecret }}
+                  {{- else }}
+                    {{ include "beszel.fullname" . }}-agent
+                  {{- end }}
+                  key: key
           ports:
             - containerPort: {{ .Values.agent.listenPort | int }}
               hostPort: {{ .Values.agent.listenPort | int }}
